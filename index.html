@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>無限漢字生成器 v18 (Rect Control)</title>
+    <style>
+        body { font-family: "Yu Mincho", serif; background: #f4f4f4; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { display: flex; gap: 20px; align-items: flex-start; }
+        .canvas-area { background: #fff; border: 1px solid #333; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .controls { display: flex; flex-direction: column; gap: 15px; width: 320px; }
+        .panel { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ddd; }
+        button { padding: 8px 12px; cursor: pointer; font-family: inherit; margin: 2px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+        select, input[type="range"] { width: 100%; padding: 5px; margin-bottom: 10px; }
+        .loading { color: #666; font-size: 12px; margin-top: 5px; display: none; }
+        #partNameDisplay { font-weight: bold; color: #0056b3; }
+        textarea { width: 100%; height: 60px; font-size: 10px; margin-top: 5px; font-family: monospace; }
+        .info { font-size: 12px; color: #666; margin-top: 5px; line-height: 1.4; }
+        .param-val { float: right; font-weight: normal; }
+        h2 { font-size: 16px; margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+    </style>
+    
+    <script src="./kage/buhin.js"></script>
+    <script src="./kage/polygon.js"></script>
+    <script src="./kage/polygons.js"></script>
+    <script src="./kage/curve.js"></script>
+    <script src="./kage/2d.js"></script>
+    <script src="./kage/kagedf.js"></script>
+    <script src="./kage/kagecd.js"></script>
+    <script src="./kage/kage.js"></script>
+</head>
+<body>
+
+<h1>無限漢字生成器 v18</h1>
+<p style="font-size:12px; color:#555;">グリフ有効領域 (Rect) 指定対応版 - JSDoc Documented</p>
+
+<div class="container">
+    <div class="canvas-area">
+        <canvas id="kanjiCanvas" width="400" height="400"></canvas>
+    </div>
+
+    <div class="controls">
+        <div class="panel">
+            <h2>1. パーツ選択</h2>
+            <div id="palette"></div>
+            <p>選択中: <span id="partNameDisplay">なし</span></p>
+            <div id="loadingMsg" class="loading">GlyphWikiからロード中...</div>
+        </div>
+
+        <div class="panel">
+            <h2>2. 調整</h2>
+            <label>面積増加係数 <span id="areaVal" class="param-val">1.0</span></label>
+            <input type="range" id="areaFactor" min="0.1" max="5.0" step="0.1" value="1.0" oninput="document.getElementById('areaVal').textContent=this.value">
+        </div>
+
+        <div class="panel">
+            <h2>3. 合成</h2>
+            <select id="layoutMode"></select>
+            <button id="btnCombine">合成を実行</button>
+            <button id="btnBack">ひとつ戻る</button>
+            <button id="btnReset">リセット</button>
+            <button id="btnRandom">ランダム</button>
+        </div>
+
+        <div class="panel">
+            <h2>4. データ入出力</h2>
+            <div id="sizeInfo" class="info">初期状態</div>
+            <textarea id="ioArea" placeholder="JSON出力/入力"></textarea>
+            <div style="margin-top:5px; text-align:right;">
+                <button id="btnExport">JSON出力</button>
+                <button id="btnImport">JSON読込</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="kanjiComposition.js"></script>
+<script src="kanjiRenderer.js"></script>
+<script>
+// --- メイン処理 ---
+const glyphLoader = new GlyphLoader();
+const composer = new KanjiComposer(glyphLoader);
+const renderer = new KanjiRenderer(glyphLoader);
+const editorState = new KanjiEditorState();
+
+let currentSelectedItem = null; // 現在選択中のConfigアイテム
+
+const canvas = document.getElementById('kanjiCanvas');
+const loadingEl = document.getElementById('loadingMsg');
+const ioAreaEl = document.getElementById('ioArea');
+const sizeInfoEl = document.getElementById('sizeInfo');
+const layoutSelectEl = document.getElementById('layoutMode');
+const paletteEl = document.getElementById('palette');
+const areaFactorEl = document.getElementById('areaFactor');
+
+/**
+ * アプリケーションの初期化
+ */
+async function init() {
+    // パレットボタン生成
+    GlyphConfig.CHARS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.textContent = item.char;
+        btn.onclick = () => selectPart(item);
+        paletteEl.appendChild(btn);
+    });
+
+    // 初期データのロード
+    if(GlyphConfig.CHARS.length > 0) {
+        await selectPart(GlyphConfig.CHARS[0]);
+        editorState.reset(await glyphLoader.load(GlyphConfig.CHARS[0].char));
+        refreshView();
+    }
+
+    // イベントリスナー登録
+    document.getElementById('btnCombine').onclick = doCombine;
+    document.getElementById('btnReset').onclick = doReset;
+    document.getElementById('btnBack').onclick = doUndo;
+    document.getElementById('btnRandom').onclick = doRandom;
+    document.getElementById('btnExport').onclick = () => { ioAreaEl.value = editorState.exportJson(); };
+    document.getElementById('btnImport').onclick = () => {
+        if(editorState.importJson(ioAreaEl.value)) { refreshView(); alert("復元しました"); }
+        else { alert("形式エラー"); }
+    };
+    areaFactorEl.oninput = (e) => { document.getElementById('areaVal').textContent = e.target.value; };
+}
+
+/**
+ * パレットからパーツを選択したときの処理
+ * @param {CharConfig} item 
+ */
+async function selectPart(item) {
+    loadingEl.style.display = 'block';
+    currentSelectedItem = item; 
+    updateLayoutOptions(item);
+    
+    // ベース文字をプリロード
+    await glyphLoader.load(item.char);
+    
+    document.getElementById('partNameDisplay').textContent = item.char;
+    loadingEl.style.display = 'none';
+}
+
+/**
+ * 選択されたパーツに応じてレイアウト選択肢を更新
+ * @param {CharConfig} item 
+ */
+function updateLayoutOptions(item) {
+    layoutSelectEl.innerHTML = "";
+    item.layouts.forEach(key => {
+        const label = GlyphConfig.LAYOUT_LABELS[key];
+        if(label) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = label;
+            layoutSelectEl.appendChild(option);
+        }
+    });
+}
+
+/**
+ * 合成実行アクション
+ */
+async function doCombine() {
+    loadingEl.style.display = 'block';
+    const mode = layoutSelectEl.value;
+    const factor = parseFloat(areaFactorEl.value);
+    const currentState = editorState.getCurrent();
+    
+    const { id, rect: partRect } = GlyphConfig.getVariantInfo(currentSelectedItem, mode);
+    const partDataStr = await glyphLoader.load(id);
+    
+    // 合成計算の実行
+    const result = composer.compose(
+        currentState.data, 
+        partDataStr, 
+        mode, 
+        currentState.logicalSize, 
+        currentState.area,
+        factor,
+        partRect // Rect情報を渡す
+    );
+
+    // 状態更新と再描画
+    editorState.update(result.data, result.logicalSize, result.area);
+    refreshView();
+    loadingEl.style.display = 'none';
+}
+
+/**
+ * ランダム生成アクション
+ */
+async function doRandom() {
+    loadingEl.style.display = 'block';
+    const factor = parseFloat(areaFactorEl.value);
+    const currentState = editorState.getCurrent();
+    const result = await composer.composeRandom(
+        currentState.data, 
+        currentState.logicalSize, 
+        currentState.area, 
+        factor
+    );
+
+    editorState.update(result.data, result.logicalSize, result.area);
+    refreshView();
+    loadingEl.style.display = 'none';
+}
+
+function doReset() {
+    selectPart(GlyphConfig.CHARS[0]).then(async () => {
+        const data = await glyphLoader.load(GlyphConfig.CHARS[0].char);
+        editorState.reset(data);
+        refreshView();
+    });
+}
+
+function doUndo() {
+    if(editorState.undo()) refreshView();
+}
+
+/**
+ * 画面表示の更新 (Canvas描画 + 情報表示)
+ */
+function refreshView() {
+    const state = editorState.getCurrent();
+    const metrics = renderer.draw(canvas, state.data, state.logicalSize, state.area);
+    if (metrics) {
+        sizeInfoEl.innerHTML = `
+            論理サイズ: ${state.logicalSize} px<br>
+            視覚サイズ: ${metrics.visualSize.toFixed(1)} px<br>
+            スケール係数: ${metrics.scaleFactor.toFixed(4)}
+        `;
+    }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
