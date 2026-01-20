@@ -33,7 +33,7 @@ class GlyphConfig {
             { 
                 char: "木", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1] } }, // きへん
+                variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1], strokes: 3 } }, // きへん
                 weight: 1,
                 strokes: 4
             },
@@ -64,14 +64,14 @@ class GlyphConfig {
             { 
                 char: "人", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_LEFT"],
-                variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1] } }, // にんべん
+                variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1], strokes: 2 } }, // にんべん
                 weight: 1,
                 strokes: 2
             },
             { 
                 char: "水", 
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1] } }, // さんずい
+                variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1], strokes: 3 } }, // さんずい
                 weight: 1,
                 strokes: 4
             },
@@ -79,8 +79,8 @@ class GlyphConfig {
                 char: "火", 
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { 
-                    "ADD_LEFT": { id: "u706b-01", rect: [0, 0, 0.5, 1] }, // ひへん
-                    "ADD_BOTTOM": { id: "u706c-04", rect: [0, 0.6, 1, 0.4] } // れっか (下部に配置されている前提)
+                    "ADD_LEFT": { id: "u706b-01", rect: [0, 0, 0.5, 1], strokes: 4 }, // ひへん
+                    "ADD_BOTTOM": { id: "u706c-04", rect: [0, 0.6, 1, 0.4], strokes: 4 } // れっか (下部に配置されている前提)
                 },
                 weight: 1,
                 strokes: 4
@@ -88,7 +88,7 @@ class GlyphConfig {
             { 
                 char: "土", 
                 layouts: ["ADD_RIGHT", "ADD_BOTTOM", "ADD_LEFT"],
-                variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1] } }, // 土偏
+                variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1], strokes: 3 } }, // 土偏
                 weight: 1,
                 strokes: 3
             },
@@ -108,7 +108,7 @@ class GlyphConfig {
             { 
                 char: "言", 
                 layouts: ["ADD_LEFT", "ADD_RIGHT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1] } }, // 言偏
+                variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1], strokes: 7 } }, // 言偏
                 weight: 1,
                 strokes: 7
             },
@@ -116,7 +116,7 @@ class GlyphConfig {
                 char: "心", 
                 layouts: ["ADD_BOTTOM", "ADD_RIGHT", "ADD_LEFT"],
                 variants: { 
-                    "ADD_LEFT": { id: "u5fc4-01", rect: [0, 0, 0.4, 1] }, // りっしんべん
+                    "ADD_LEFT": { id: "u5fc4-01", rect: [0, 0, 0.4, 1], strokes: 3 }, // りっしんべん
                     "ADD_BOTTOM": { id: "u5fc3-04", rect: [0, 0.6, 1, 0.4] } // したごころ
                 },
                 weight: 1,
@@ -125,14 +125,14 @@ class GlyphConfig {
             {
                 char: "手",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1] } }, // 手偏
+                variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1], strokes: 3 } }, // 手偏
                 weight: 1,
                 strokes: 4
             },
             {
                 char: "示",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1] } }, // しめすへん
+                variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1], strokes: 5 } }, // しめすへん
                 weight: 1,
                 strokes: 5
             },
@@ -190,14 +190,15 @@ class GlyphConfig {
     }
 
     /**
-     * 指定された文字設定とレイアウトモードに対するバリアント情報（グリフIDと有効領域）を解決します。
+     * 指定された文字設定とレイアウトモードに対するバリアント情報（グリフID、有効領域、画数）を解決します。
      * @param {CharConfig} charConfig - 対象の文字設定オブジェクト
      * @param {string} layoutMode - 適用するレイアウトモード
-     * @returns {{id: string, rect: Rect|null}} グリフIDと有効領域(Rect)のペア
+     * @returns {{id: string, rect: Rect|null, strokes: number}} グリフID、有効領域(Rect)、画数のオブジェクト
      */
     static getVariantInfo(charConfig, layoutMode) {
         let id;
         let rect = null;
+        let strokes = charConfig.strokes || 1;
 
         const variant = charConfig.variants ? charConfig.variants[layoutMode] : undefined;
 
@@ -212,6 +213,9 @@ class GlyphConfig {
                         h: variant.rect[3]
                     };
                 }
+                if (typeof variant.strokes === 'number') {
+                    strokes = variant.strokes;
+                }
             } else if (typeof variant === 'string') {
                 id = variant;
             }
@@ -221,7 +225,7 @@ class GlyphConfig {
             id = charConfig.char;
         }
 
-        return { id, rect };
+        return { id, rect, strokes };
     }
 }
 
@@ -523,9 +527,8 @@ class KanjiComposer {
         const layoutMode = charConfig.layouts[Math.floor(Math.random() * charConfig.layouts.length)];
         
         // 3. バリアントとRectの解決 (GlyphConfigに委譲)
-        const { id, rect: partRect } = GlyphConfig.getVariantInfo(charConfig, layoutMode);
+        const { id, rect: partRect, strokes: partStrokes } = GlyphConfig.getVariantInfo(charConfig, layoutMode);
         const partDataStr = await this.loader.load(id);
-        const partStrokes = charConfig.strokes || 1;
 
         // 4. 合成実行
         const result = this.compose(
