@@ -34,39 +34,46 @@ class GlyphConfig {
                 char: "木", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1] } }, // きへん
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "日", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "口", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "田", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "門", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ENCLOSE_GATE"],
-                weight: 0.3
+                weight: 0.3,
+                strokes: 1
             },
             { 
                 char: "人", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_LEFT"],
                 variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1] } }, // にんべん
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "水", 
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1] } }, // さんずい
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "火", 
@@ -75,30 +82,35 @@ class GlyphConfig {
                     "ADD_LEFT": { id: "u706b-01", rect: [0, 0, 0.5, 1] }, // ひへん
                     "ADD_BOTTOM": { id: "u706c-04", rect: [0, 0.6, 1, 0.4] } // れっか (下部に配置されている前提)
                 },
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "土", 
                 layouts: ["ADD_RIGHT", "ADD_BOTTOM", "ADD_LEFT"],
                 variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1] } }, // 土偏
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "山", 
                 layouts: ["ADD_TOP", "ADD_LEFT"],
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "雨", 
                 layouts: ["ADD_TOP", "ADD_RIGHT"],
                 variants: { "ADD_TOP": { id: "u96e8-03", rect: [0, 0, 1, 0.5] } }, // 雨冠 (上60%くらい)
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "言", 
                 layouts: ["ADD_LEFT", "ADD_RIGHT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1] } }, // 言偏
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "心", 
@@ -107,30 +119,35 @@ class GlyphConfig {
                     "ADD_LEFT": { id: "u5fc4-01", rect: [0, 0, 0.4, 1] }, // りっしんべん
                     "ADD_BOTTOM": { id: "u5fc3-04", rect: [0, 0.6, 1, 0.4] } // したごころ
                 },
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             {
                 char: "手",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1] } }, // 手偏
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             {
                 char: "示",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1] } }, // しめすへん
-                weight: 1
+                weight: 1,
+                strokes: 1
             },
             { 
                 char: "辶",
                 layouts: ["NYOU"],
                 variants: { "NYOU": { id: "u8fb6-g", rect: [0, 0, 1, 1] } }, // しんにょう
-                weight: 0.3
+                weight: 0.3,
+                strokes: 1
             },
             { 
                 char: "囗", 
                 layouts: ["ENCLOSE"],
-                weight: 1
+                weight: 1,
+                strokes: 1
             }
         ];
     }
@@ -374,12 +391,13 @@ class KanjiComposer {
      * @param {Rect} [partRect] - 追加パーツの有効領域情報
      * @returns {{data: string, logicalSize: number, area: number}} 合成結果
      */
-    compose(currentData, partData, layoutMode, currentLogicalSize, currentArea, areaFactor, partRect) {
+    compose(currentData, partData, layoutMode, currentLogicalSize, currentArea, currentStrokes, areaFactor, partRect, partStrokes) {
         const strokesCurrent = this.flatten(currentData);
         const strokesPart = this.flatten(partData);
 
         let nextLogicalSize = currentLogicalSize;
         let boxCurrent = {}, boxPart = {};
+        let nextStrokes = currentStrokes + partStrokes;
 
         // デフォルトのパーツRect (指定なければフルサイズ)
         const srcPartRect = partRect || { x:0, y:0, w:1, h:1 };
@@ -447,7 +465,8 @@ class KanjiComposer {
             return {
                 data: this.stringify([...s1, ...s2, ...s3]),
                 logicalSize: nextLogicalSize,
-                area: nextArea
+                area: nextArea,
+                strokes: partStrokes * 3
             };
         }
 
@@ -481,7 +500,8 @@ class KanjiComposer {
         return {
             data: this.stringify([...transCurrent, ...transPart]),
             logicalSize: Math.floor(nextLogicalSize),
-            area: nextArea
+            area: nextArea,
+            strokes: nextStrokes
         };
     }
 
@@ -495,7 +515,7 @@ class KanjiComposer {
      * @param {number} areaFactor - 面積係数
      * @returns {Promise<{data: string, logicalSize: number, area: number, info: {char: string, layout: string}}>}
      */
-    async composeRandom(currentData, currentLogicalSize, currentArea, areaFactor) {
+    async composeRandom(currentData, currentLogicalSize, currentArea, currentStrokes, areaFactor) {
         // 1. 重み付きでランダムなパーツを選択
         const charConfig = GlyphConfig.getRandomChar();
         
@@ -505,6 +525,7 @@ class KanjiComposer {
         // 3. バリアントとRectの解決 (GlyphConfigに委譲)
         const { id, rect: partRect } = GlyphConfig.getVariantInfo(charConfig, layoutMode);
         const partDataStr = await this.loader.load(id);
+        const partStrokes = charConfig.strokes || 1;
 
         // 4. 合成実行
         const result = this.compose(
@@ -513,8 +534,10 @@ class KanjiComposer {
             layoutMode, 
             currentLogicalSize, 
             currentArea, 
+            currentStrokes,
             areaFactor,
-            partRect
+            partRect,
+            partStrokes
         );
         
         // 結果と、何を追加したかの情報を返す
@@ -538,26 +561,28 @@ class KanjiEditorState {
         this.state = this._getInitialState();
     }
     _getInitialState() {
-        return { data: "", logicalSize: 200, area: 40000 };
+        return { data: "", logicalSize: 200, area: 40000, strokes: 0 };
     }
     
     /**
      * 状態をリセットします。
      * @param {string} initialData - 初期データ
+     * @param {number} initialStrokes - 初期の画数
      */
-    reset(initialData) {
+    reset(initialData, initialStrokes = 0) {
         this.history = [];
-        this.state = { data: initialData, logicalSize: 200, area: 40000 };
+        this.state = { data: initialData, logicalSize: 200, area: 40000, strokes: initialStrokes };
     }
     
     /**
      * 新しい状態に更新し、履歴に追加します。
      */
-    update(newData, newSize, newArea) {
+    update(newData, newSize, newArea, newStrokes) {
         this.history.push({ ...this.state });
         this.state.data = newData;
         this.state.logicalSize = newSize;
         this.state.area = newArea;
+        this.state.strokes = newStrokes;
     }
     
     /**
@@ -573,6 +598,7 @@ class KanjiEditorState {
     }
     
     getCurrent() { return this.state; }
+    getTotalStrokes() { return this.state.strokes; }
     
     /**
      * 現在の状態をJSON文字列としてエクスポートします。
@@ -587,9 +613,14 @@ class KanjiEditorState {
     importJson(jsonString) {
         try {
             const parsed = JSON.parse(jsonString);
-            if (typeof parsed.data === 'string' && typeof parsed.logicalSize === 'number' && typeof parsed.area === 'number') {
+            if (typeof parsed.data === 'string' && 
+                typeof parsed.logicalSize === 'number' && 
+                typeof parsed.area === 'number') {
+                
                 this.history = [];
-                this.state = parsed;
+                // 互換性のためstrokesがなくても許容
+                const strokes = typeof parsed.strokes === 'number' ? parsed.strokes : 0;
+                this.state = { ...parsed, strokes };
                 return true;
             } else { return false; }
         } catch (e) { return false; }

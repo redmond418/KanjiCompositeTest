@@ -107,8 +107,11 @@ async function init() {
 
     // 初期データのロード
     if(GlyphConfig.CHARS.length > 0) {
-        await selectPart(GlyphConfig.CHARS[0]);
-        editorState.reset(await glyphLoader.load(GlyphConfig.CHARS[0].char));
+        const initialChar = GlyphConfig.CHARS[0];
+        await selectPart(initialChar);
+        const initialData = await glyphLoader.load(initialChar.char);
+        const initialStrokes = initialChar.strokes || 1;
+        editorState.reset(initialData, initialStrokes);
         refreshView();
     }
 
@@ -169,6 +172,7 @@ async function doCombine() {
     
     const { id, rect: partRect } = GlyphConfig.getVariantInfo(currentSelectedItem, mode);
     const partDataStr = await glyphLoader.load(id);
+    const partStrokes = currentSelectedItem.strokes || 1;
     
     // 合成計算の実行
     const result = composer.compose(
@@ -177,12 +181,14 @@ async function doCombine() {
         mode, 
         currentState.logicalSize, 
         currentState.area,
+        currentState.strokes,
         factor,
-        partRect // Rect情報を渡す
+        partRect, // Rect情報を渡す
+        partStrokes
     );
 
     // 状態更新と再描画
-    editorState.update(result.data, result.logicalSize, result.area);
+    editorState.update(result.data, result.logicalSize, result.area, result.strokes);
     refreshView();
     loadingEl.style.display = 'none';
 }
@@ -198,18 +204,21 @@ async function doRandom() {
         currentState.data, 
         currentState.logicalSize, 
         currentState.area, 
+        currentState.strokes,
         factor
     );
 
-    editorState.update(result.data, result.logicalSize, result.area);
+    editorState.update(result.data, result.logicalSize, result.area, result.strokes);
     refreshView();
     loadingEl.style.display = 'none';
 }
 
 function doReset() {
-    selectPart(GlyphConfig.CHARS[0]).then(async () => {
-        const data = await glyphLoader.load(GlyphConfig.CHARS[0].char);
-        editorState.reset(data);
+    const initialChar = GlyphConfig.CHARS[0];
+    selectPart(initialChar).then(async () => {
+        const data = await glyphLoader.load(initialChar.char);
+        const initialStrokes = initialChar.strokes || 1;
+        editorState.reset(data, initialStrokes);
         refreshView();
     });
 }
@@ -226,6 +235,7 @@ function refreshView() {
     const metrics = renderer.draw(canvas, state.data, state.logicalSize, state.area);
     if (metrics) {
         sizeInfoEl.innerHTML = `
+            総画数: ${state.strokes} <br>
             論理サイズ: ${state.logicalSize} px<br>
             視覚サイズ: ${metrics.visualSize.toFixed(1)} px<br>
             スケール係数: ${metrics.scaleFactor.toFixed(4)}
