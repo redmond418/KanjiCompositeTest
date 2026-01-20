@@ -35,45 +35,45 @@ class GlyphConfig {
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1] } }, // きへん
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             { 
                 char: "日", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             { 
                 char: "口", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
                 weight: 1,
-                strokes: 1
+                strokes: 3
             },
             { 
                 char: "田", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
                 weight: 1,
-                strokes: 1
+                strokes: 5
             },
             { 
                 char: "門", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ENCLOSE_GATE"],
                 weight: 0.3,
-                strokes: 1
+                strokes: 8
             },
             { 
                 char: "人", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_LEFT"],
                 variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1] } }, // にんべん
                 weight: 1,
-                strokes: 1
+                strokes: 2
             },
             { 
                 char: "水", 
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1] } }, // さんずい
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             { 
                 char: "火", 
@@ -83,34 +83,34 @@ class GlyphConfig {
                     "ADD_BOTTOM": { id: "u706c-04", rect: [0, 0.6, 1, 0.4] } // れっか (下部に配置されている前提)
                 },
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             { 
                 char: "土", 
                 layouts: ["ADD_RIGHT", "ADD_BOTTOM", "ADD_LEFT"],
                 variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1] } }, // 土偏
                 weight: 1,
-                strokes: 1
+                strokes: 3
             },
             { 
                 char: "山", 
                 layouts: ["ADD_TOP", "ADD_LEFT"],
                 weight: 1,
-                strokes: 1
+                strokes: 3
             },
             { 
                 char: "雨", 
                 layouts: ["ADD_TOP", "ADD_RIGHT"],
                 variants: { "ADD_TOP": { id: "u96e8-03", rect: [0, 0, 1, 0.5] } }, // 雨冠 (上60%くらい)
                 weight: 1,
-                strokes: 1
+                strokes: 8
             },
             { 
                 char: "言", 
                 layouts: ["ADD_LEFT", "ADD_RIGHT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1] } }, // 言偏
                 weight: 1,
-                strokes: 1
+                strokes: 7
             },
             { 
                 char: "心", 
@@ -120,34 +120,34 @@ class GlyphConfig {
                     "ADD_BOTTOM": { id: "u5fc3-04", rect: [0, 0.6, 1, 0.4] } // したごころ
                 },
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             {
                 char: "手",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1] } }, // 手偏
                 weight: 1,
-                strokes: 1
+                strokes: 4
             },
             {
                 char: "示",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
                 variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1] } }, // しめすへん
                 weight: 1,
-                strokes: 1
+                strokes: 5
             },
             { 
                 char: "辶",
                 layouts: ["NYOU"],
                 variants: { "NYOU": { id: "u8fb6-g", rect: [0, 0, 1, 1] } }, // しんにょう
                 weight: 0.3,
-                strokes: 1
+                strokes: 3
             },
             { 
                 char: "囗", 
                 layouts: ["ENCLOSE"],
                 weight: 1,
-                strokes: 1
+                strokes: 3
             }
         ];
     }
