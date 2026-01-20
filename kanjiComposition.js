@@ -33,33 +33,40 @@ class GlyphConfig {
             { 
                 char: "木", 
                 layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1] } } // きへん
+                variants: { "ADD_LEFT": { id: "u6728-01", rect: [0, 0, 0.45, 1] } }, // きへん
+                weight: 1
             },
             { 
                 char: "日", 
-                layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"] 
+                layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
+                weight: 1
             },
             { 
                 char: "口", 
-                layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"] 
+                layouts: ["ADD_RIGHT", "ADD_LEFT", "ADD_TOP", "ADD_BOTTOM"],
+                weight: 1
             },
             { 
                 char: "田", 
-                layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"] 
+                layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_BOTTOM"],
+                weight: 1
             },
             { 
                 char: "門", 
-                layouts: ["ADD_RIGHT", "ADD_LEFT", "ENCLOSE_GATE"] 
+                layouts: ["ADD_RIGHT", "ADD_LEFT", "ENCLOSE_GATE"],
+                weight: 0.3
             },
             { 
                 char: "人", 
                 layouts: ["ADD_RIGHT", "ADD_TOP", "ADD_LEFT"],
-                variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1] } } // にんべん
+                variants: { "ADD_LEFT": { id: "u4ebb-01", rect: [0, 0, 0.5, 1] } }, // にんべん
+                weight: 1
             },
             { 
                 char: "水", 
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1] } } // さんずい
+                variants: { "ADD_LEFT": { id: "u6c35-01", rect: [0, 0, 0.45, 1] } }, // さんずい
+                weight: 1
             },
             { 
                 char: "火", 
@@ -67,26 +74,31 @@ class GlyphConfig {
                 variants: { 
                     "ADD_LEFT": { id: "u706b-01", rect: [0, 0, 0.5, 1] }, // ひへん
                     "ADD_BOTTOM": { id: "u706c-04", rect: [0, 0.6, 1, 0.4] } // れっか (下部に配置されている前提)
-                } 
+                },
+                weight: 1
             },
             { 
                 char: "土", 
                 layouts: ["ADD_RIGHT", "ADD_BOTTOM", "ADD_LEFT"],
-                variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1] } } // 土偏
+                variants: { "ADD_LEFT": { id: "u571f-01", rect: [0, 0, 0.55, 1] } }, // 土偏
+                weight: 1
             },
             { 
                 char: "山", 
-                layouts: ["ADD_TOP", "ADD_LEFT"] 
+                layouts: ["ADD_TOP", "ADD_LEFT"],
+                weight: 1
             },
             { 
                 char: "雨", 
                 layouts: ["ADD_TOP", "ADD_RIGHT"],
-                variants: { "ADD_TOP": { id: "u96e8-03", rect: [0, 0, 1, 0.5] } } // 雨冠 (上60%くらい)
+                variants: { "ADD_TOP": { id: "u96e8-03", rect: [0, 0, 1, 0.5] } }, // 雨冠 (上60%くらい)
+                weight: 1
             },
             { 
                 char: "言", 
                 layouts: ["ADD_LEFT", "ADD_RIGHT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1] } } // 言偏
+                variants: { "ADD_LEFT": { id: "u8a00-01", rect: [0, 0, 0.4, 1] } }, // 言偏
+                weight: 1
             },
             { 
                 char: "心", 
@@ -94,29 +106,54 @@ class GlyphConfig {
                 variants: { 
                     "ADD_LEFT": { id: "u5fc4-01", rect: [0, 0, 0.4, 1] }, // りっしんべん
                     "ADD_BOTTOM": { id: "u5fc3-04", rect: [0, 0.6, 1, 0.4] } // したごころ
-                }
+                },
+                weight: 1
             },
             {
                 char: "手",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1] } } // 手偏
+                variants: { "ADD_LEFT": { id: "u624c-01", rect: [0, 0, 0.45, 1] } }, // 手偏
+                weight: 1
             },
             {
                 char: "示",
                 layouts: ["ADD_LEFT", "ADD_BOTTOM"],
-                variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1] } } // しめすへん
+                variants: { "ADD_LEFT": { id: "u793b-01", rect: [0, 0, 0.45, 1] } }, // しめすへん
+                weight: 1
             },
             { 
                 char: "辶",
                 layouts: ["NYOU"],
-                variants: { "NYOU": { id: "u8fb6-g", rect: [0, 0, 1, 1] } } // しんにょう
+                variants: { "NYOU": { id: "u8fb6-g", rect: [0, 0, 1, 1] } }, // しんにょう
+                weight: 0.3
             },
             { 
                 char: "囗", 
-                layouts: ["ENCLOSE"] 
+                layouts: ["ENCLOSE"],
+                weight: 1
             }
         ];
     }
+
+    /**
+     * 重み付きでランダムな文字設定を返します。
+     * @returns {CharConfig}
+     */
+    static getRandomChar() {
+        const chars = this.CHARS;
+        const totalWeight = chars.reduce((sum, char) => sum + (char.weight !== undefined ? char.weight : 1), 0);
+        let random = Math.random() * totalWeight;
+
+        for (const char of chars) {
+            const weight = (char.weight !== undefined ? char.weight : 1);
+            if (random < weight) {
+                return char;
+            }
+            random -= weight;
+        }
+        return chars[chars.length - 1]; // フォールバック
+    }
+
 
     /**
      * レイアウトIDと表示ラベルの対応マップを取得します。
@@ -459,9 +496,8 @@ class KanjiComposer {
      * @returns {Promise<{data: string, logicalSize: number, area: number, info: {char: string, layout: string}}>}
      */
     async composeRandom(currentData, currentLogicalSize, currentArea, areaFactor) {
-        // 1. ランダムなパーツを選択
-        const charList = GlyphConfig.CHARS;
-        const charConfig = charList[Math.floor(Math.random() * charList.length)];
+        // 1. 重み付きでランダムなパーツを選択
+        const charConfig = GlyphConfig.getRandomChar();
         
         // 2. そのパーツが許可するレイアウトからランダムに選択
         const layoutMode = charConfig.layouts[Math.floor(Math.random() * charConfig.layouts.length)];
